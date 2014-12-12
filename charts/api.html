@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+
+<script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script>
+
+    //replace this with your own RSS feed
+    var rssFeed = "http://grantland.com/features/feed/";
+
+    $.ajax({
+        url           : "http://ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=1000&callback=?&q=" + rssFeed, 
+        dataType      : "json", //json or jsonp
+    }).success(function(d){
+
+        //we only need the feed part
+        d = d.responseData.feed;
+
+        //prints out the data
+        console.log(d);
+
+        $("body").append("<h1>" + d.title + "</h1>");
+
+        for(var i=0; i < d.entries.length; i++){
+
+        	$("body").append("<img src=\"" +  d.entries[i].mediaGroups[0].contents[0].url +  "\" />");
+        	$("body").append("<p>" + d.entries[i].contentSnippet + "</p>");
+
+
+
+        }
+
+    })
+
+</script>
+
+</body>
+</html>

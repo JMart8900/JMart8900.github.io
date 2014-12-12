@@ -1,0 +1,188 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Golden State Warriors home attendance</title>
+    <link href="d3.tip.css" rel="stylesheet">
+    <style> 
+    .axis text {
+        font-family: arial;
+        font-size: 12px;
+    }
+    .axis path{
+      fill:none;
+      stroke:black;
+      stroke-width: 2px;
+    }
+    .bar{
+        stroke: none;
+        fill: #feb24c;
+
+    }
+    .textlabel{
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 11px;
+    }
+
+    .d3-tip{
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 14px;
+
+
+    }
+</style>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="d3.tip.js"></script>
+
+</head>
+<body>
+
+<script>
+        
+        var margin = {top:70, right:0, bottom:20, left:75},
+        width  = 900 - margin.left - margin.right,
+        height = 700 - margin.top  - margin.bottom;
+
+        var svg = d3.select("body")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+
+        var chart = svg.append("g")
+        .attr("transform", "translate(" + margin.left + ", " + margin.top + ")");
+
+         var yScale = d3.scale.linear()
+          .range([height - margin.top - margin.bottom, 0]);
+
+         var xScale = d3.scale.ordinal()
+          .rangeRoundBands([0, width], .1);
+
+         var xAxis = d3.svg.axis()
+          .scale(xScale)
+          .orient("bottom");
+
+          var tip = d3.tip()
+            .attr("class", "d3-tip")
+            .html(function(d) { 
+
+              
+                //hypothetical example:
+
+                var content = "<strong>Attendance:</strong> " + d3.format(",")(d["Average home attendance"]); 
+
+                return content; 
+          });
+
+
+
+         var yAxis = d3.svg.axis()
+          .scale(yScale)
+          .orient("left");
+
+          d3.csv("GSW_bar_chart.csv", function(error, data){
+
+            data = data.map(function(d){ 
+                d["Average home attendance"] = +d["Average home attendance"]; 
+                return d;
+            });
+
+
+            yScale.domain([0, 20000]);
+
+            xScale.domain(data.map(function(d){ return d["NBA season"]; }));
+
+            svg.call(tip);
+
+            svg.append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                .selectAll(".bar")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("x", function(d){ return xScale(d["NBA season"]); })
+                .attr("y", function(d){ return yScale(d["Average home attendance"]); })
+                .attr("height", function(d){ return height - margin.top - margin.bottom - yScale(d["Average home attendance"]); })
+                .attr("width", function(d){ return xScale.rangeBand(); })
+
+
+
+                .on("mouseover", function(d){
+
+                  tip.show(d);
+
+                  d3.select(this)
+                    .style({"fill":"blue"})
+                })
+                .on("mouseout", function(d){
+
+                  tip.hide();
+
+                  d3.select(this)
+                    .style({"fill":"#feb24c"})
+
+                });
+
+
+
+                //setting the axes
+        svg.append("g")
+            .attr("class", "y axis")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+            .call(yAxis);
+
+        svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(" + margin.left + "," + (height + margin.top) + ")"); 
+
+
+
+
+             //adding a label at the top of the chart
+            svg.append("g")
+               .attr("transform", "translate(" + (width/2) + ", 25)")
+               .append("text")
+               .text("The average home attendance for the Golden State Warriors since 2009")
+               .style({"text-anchor":"middle", "font-family":"Helvetica", "font-size": "16px", "font-weight":"800"});
+
+
+            //adding y axis to the left of the chart
+            svg.append("g")
+                .attr("class", "y axis")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+                .call(yAxis);
+
+            //adding x axis to the bottom of chart
+            svg.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(" + margin.left + "," + (height - margin.bottom) + ")")
+                .call(xAxis);
+
+
+            svg.append("text")
+               .attr("x", width/2)
+               .attr("y", 650)
+               .text("Year/NBA season")
+               .style({"font-family":"Helvetica", "font-size":"14px", "font-weight":"bold"});
+
+
+            svg.append("text")
+               .attr("x", -180)
+               .attr("y", 260)
+               .text("Average number of fans per game")
+               .style({"font-family":"Helvetica", "font-size":"14px", "font-weight":"bold"})
+               .attr("transform", "rotate(-90, 10, 260)");
+
+
+            
+
+        })
+
+           
+
+
+
+    </script>
+</body>
+</html>
+
+      
