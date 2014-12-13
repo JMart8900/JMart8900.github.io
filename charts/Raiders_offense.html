@@ -26,6 +26,19 @@
       stroke-width: 1.5px;
     }
 
+    div.tooltip {
+    position: absolute;
+    text-align: center;
+    width: 60px;
+    height: 28px;
+    padding: 2px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;
+    }
+
     </style>
 </head>
 <body>
@@ -38,6 +51,8 @@
         height = 400;
 
     var parseDate = d3.time.format("%Y").parse;
+
+    var formatTime = d3.time.format("%Y");
 
     var x = d3.time.scale()
         .range([0, width]);
@@ -60,7 +75,7 @@
     var line = d3.svg.line()
         .x(function(d) { return x(d.Year); })
         .y(function(d) { return y(d.Wins); })
-        .interpolate("basis");
+        //.interpolate("basis");
 
     var svg = d3.select("body").append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -68,12 +83,11 @@
         .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-        var circle = svg.append("circle")
-        .attr("r", 8)
-        .attr("cx", 0)
-        .attr("cy", 0)
-        .style({fill: '#fff', 'fill-opacity': .2, stroke: '#000', "stroke-width": '1px'})
-        .attr("opacity", 0);
+        
+
+    var div = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
 
         d3.csv("Raiders_wins.csv", function(error, data) {
         data.forEach(function(d) {
@@ -109,7 +123,7 @@
           .text("Wins per season");
 
       svg.append("g")
-          .attr("transform", "translate(" + (width/2) + ", -25)")
+          .attr("transform", "translate(" + (width/2) + ", -50)")
           .append("text")
           .text("The number of wins for the Oakland Raiders since 2005")
           .style({"text-anchor":"middle", "font-family":"Arial", "font-weight":"800"});
@@ -119,6 +133,27 @@
         .attr("class", "line")
         .attr("d", line)
         .style({"stroke":"steelblue", "stroke-width":"1.5px", "fill":"none"});
+
+        svg.selectAll("dot")
+        .data(data)
+        .enter().append("circle")
+        .attr("r", 5)
+        .attr("cx", function(d) { return x(d.Year); })
+        .attr("cy", function(d) { return y(d.Wins); })
+        .on("mouseover", function(d) {
+        div.transition()
+        .duration(200)
+        .style("opacity", .9);
+        div .html(formatTime(d.Year) + "<br/>" + d.Wins)
+        .style("left", (d3.event.pageX) + "px")
+        .style("top", (d3.event.pageY - 35) + "px");
+        })
+
+        .on("mouseout", function(d) {
+        div.transition()
+        .duration(500)
+        .style("opacity", 0);
+        });
 
 
 
